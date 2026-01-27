@@ -260,7 +260,7 @@ export class ParticleField {
 
   findConnections() {
     this.connections = [];
-    const maxDistance = 100;
+    const maxDistance = 125; // Increased from 100 for longer connections
     for (let i = 0; i < this.molecules.length; i++) {
       for (let j = i + 1; j < this.molecules.length; j++) {
         const mol1 = this.molecules[i];
@@ -271,7 +271,7 @@ export class ParticleField {
         if (distance < maxDistance) {
           const strength = 1 - (distance / maxDistance);
           if ((mol1.glowing && mol2.glowing) || Math.random() < 0.1) {
-            this.connections.push({ mol1, mol2, strength: strength * 0.5 });
+            this.connections.push({ mol1, mol2, strength: strength * 0.9 });
           }
         }
       }

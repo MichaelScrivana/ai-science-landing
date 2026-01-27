@@ -336,6 +336,41 @@ body {
 .metrics {
   padding: 4rem 0;
   background: var(--primary-light);
+  position: relative;
+  transition: background 0.8s ease, box-shadow 0.8s ease;
+}
+
+.metrics::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(0, 212, 170, 0) 0%, 
+    rgba(0, 212, 170, 0.1) 50%, 
+    rgba(45, 156, 219, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.metrics.powered::before {
+  opacity: 1;
+  animation: metrics-glow 3s ease-in-out infinite;
+}
+
+.metrics.powered {
+  box-shadow: 
+    inset 0 0 60px rgba(0, 212, 170, 0.1),
+    inset 0 0 120px rgba(45, 156, 219, 0.05);
+}
+
+@keyframes metrics-glow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .metrics-grid {
@@ -351,8 +386,22 @@ body {
   border-radius: 16px;
   text-align: center;
   border: 1px solid var(--glass-border);
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.5s, border-color 0.5s;
+  opacity: 0;
+  transform: translateY(30px);
 }
+
+.metrics.powered .metric-card {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(0, 212, 170, 0.3);
+  box-shadow: 0 0 30px rgba(0, 212, 170, 0.15);
+}
+
+.metrics.powered .metric-card:nth-child(1) { transition-delay: 0.1s; }
+.metrics.powered .metric-card:nth-child(2) { transition-delay: 0.2s; }
+.metrics.powered .metric-card:nth-child(3) { transition-delay: 0.3s; }
+.metrics.powered .metric-card:nth-child(4) { transition-delay: 0.4s; }
 
 .metric-card:hover {
   transform: translateY(-5px);
@@ -368,6 +417,12 @@ body {
   font-size: 3rem;
   font-weight: 600;
   color: var(--accent-blue);
+  transition: color 0.5s, text-shadow 0.5s;
+}
+
+.metrics.powered .metric-number {
+  color: var(--accent-green);
+  text-shadow: 0 0 20px rgba(0, 212, 170, 0.5);
 }
 
 .metric-suffix {
@@ -379,82 +434,427 @@ body {
 /* Roadmap */
 .roadmap {
   position: relative;
-  background: var(--primary-light);
-  padding: 4rem 0; /* tightened gap */
+  background: var(--primary-dark);
+  padding: 6rem 0 8rem;
+  min-height: 300vh;
+  overflow: hidden;
 }
 
 .roadmap .section-title {
-  font-size: clamp(2.2rem, 6vw, 3rem);
+  font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 600;
-  
   text-align: center;
   color: var(--text-primary);
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 10;
 }
+
+/* Animated title similar to hero */
+.roadmap .section-title span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.roadmap .section-title.visible span {
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.roadmap .section-title.visible span:nth-child(1) { animation-delay: 0.1s; }
+.roadmap .section-title.visible span:nth-child(2) { animation-delay: 0.2s; }
 
 .roadmap-pin {
   position: relative;
-  height: 100vh; /* more scroll room to ensure later milestones are reachable */
+  height: auto;
+  width: 100%;
 }
 
 #roadmap-svg {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
 }
 
 #roadmap-path {
   stroke: var(--accent-blue);
   stroke-width: 3;
   fill: none;
-  opacity: 0.9;
+  opacity: 0.7;
+  filter: drop-shadow(0 0 10px var(--accent-blue));
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .roadmap-milestones {
-  position: absolute;
-  inset: 0;
-  display: block; /* positioned children */
+  position: relative;
+  width: 100%;
+  z-index: 10;
+  padding-top: 4.8rem;
 }
 
 .milestone {
-  position: absolute;
-  width: min(380px, 38vw); /* more portrait aspect ratio */
-  background: #fff;
+  position: relative;
+  width: min(450px, 50%);
+  margin: 0 auto 12rem;
+  margin-left: 20%;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  border-radius: 4px; /* rectangular vertical silhouette */
-  padding: 0.85rem 1.1rem; /* compact vertical padding */
-  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   opacity: 0;
+  transform: translateY(60px) scale(0.95);
+  transition: opacity 0.8s ease, transform 0.8s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.milestone:hover {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  transform: translateY(0) scale(1.05);
 }
 
 .milestone.visible {
   opacity: 1;
-  transition: opacity 0.6s ease;
+  transform: translateY(0) scale(1);
+}
+
+/* Powered state - glowing rim like circuit powering up */
+.milestone.powered {
+  border-left-color: var(--accent-green);
+  box-shadow: 
+    0 0 8px rgba(0, 212, 170, 0.3),
+    0 0 16px rgba(0, 212, 170, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.milestone.powered::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-blue),
+    var(--accent-green),
+    var(--accent-blue)
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.6;
+  animation: border-flow 3s linear infinite;
+}
+
+.milestone.powered::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 12px;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 212, 170, 0.3) 50%,
+    transparent 70%
+  );
+  background-size: 200% 200%;
+  opacity: 0;
+  animation: shine 2s ease-in-out;
+  pointer-events: none;
+}
+
+/* Pop-out animation triggered when line reaches card */
+.milestone.pop-out {
+  animation: pop-out 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop-out {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-3px) scale(1.024);
+  }
+  70% {
+    transform: translateY(1.5px) scale(0.994);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 8px rgba(0, 212, 170, 0.3),
+      0 0 16px rgba(0, 212, 170, 0.15),
+      0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 12px rgba(0, 212, 170, 0.4),
+      0 0 24px rgba(0, 212, 170, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    opacity: 0;
+    background-position: -100% 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: 200% 0;
+  }
+}
+
+/* Secondary card that slides out from behind */
+.milestone-detail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 520px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transform: translateX(0);
+  pointer-events: none;
+  transition: opacity 0.6s ease-out, transform 0.9s cubic-bezier(0.25, 0.1, 0.25, 1);
+  z-index: -1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .milestone-detail {
+  background: rgba(15, 22, 40, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.milestone.powered .milestone-detail {
+  opacity: 1;
+  transform: translateX(calc(100% + 1.5rem));
+  pointer-events: auto;
+  z-index: 50;
+}
+
+.milestone-detail-image {
+  width: 100%;
+  height: 140px;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+  border-radius: 12px 12px 0 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 200;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease 0.2s, transform 0.5s ease 0.2s;
+  flex-shrink: 0;
+}
+
+.milestone.powered .milestone-detail-image {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.milestone-detail-content {
+  padding: 1.5rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.milestone-detail h5 {
+  color: var(--accent-blue);
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.milestone-detail p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+  .milestone-detail {
+    display: none;
+  }
 }
 
 .milestone h4 {
-  margin-bottom: 0.5rem;
-  color: var(--accent-blue-dark);
+  margin-bottom: 1.2rem;
+  color: var(--accent-blue);
   font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+}
+
+.milestone.visible h4 {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .milestone ul {
   color: var(--text-secondary);
-  padding-left: 1rem;
-  list-style: disc;
-  margin-left: 0.5rem;
+  padding-left: 0;
+  list-style: none;
+  margin-left: 0;
 }
 
-/* milestone positions (approximate along helix) */
-.milestone.q2026-q1 { top: 10%; left: 8%; }
-.milestone.q2026-q2 { top: 22%; right: 8%; }
-.milestone.q2026-q3 { top: 34%; left: 10%; }
-.milestone.q2026-q4 { top: 46%; right: 10%; }
-.milestone.q2027-q1 { top: 58%; left: 12%; }
-.milestone.q2027-q2 { top: 70%; right: 12%; }
-.milestone.q2027-q3 { top: 82%; left: 14%; }
-.milestone.q2027-q4 { top: 94%; right: 14%; }
+.milestone li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.8rem;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.milestone.visible li:nth-child(1) {
+  transition-delay: 0.4s;
+}
+
+.milestone.visible li:nth-child(2) {
+  transition-delay: 0.5s;
+}
+
+.milestone.visible li:nth-child(3) {
+  transition-delay: 0.6s;
+}
+
+.milestone.visible li:nth-child(4) {
+  transition-delay: 0.7s;
+}
+
+.milestone.visible li:nth-child(5) {
+  transition-delay: 0.8s;
+}
+
+.milestone.visible li {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.milestone li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-green);
+  font-size: 1.1rem;
+}
+
+/* Circuit board pulse animation */
+.circuit-pulse {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 20px var(--accent-blue), 0 0 40px var(--accent-blue);
+  pointer-events: none;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.circuit-pulse.active {
+  opacity: 1;
+}
+
+.circuit-pulse::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+.circuit-pulse::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Remove old positioning - milestones now flow in document */
+.milestone.q2026-q1,
+.milestone.q2026-q2,
+.milestone.q2026-q3,
+.milestone.q2026-q4,
+.milestone.q2027-q1,
+.milestone.q2027-q2,
+.milestone.q2027-q3,
+.milestone.q2027-q4 {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+}
+
+@keyframes pulse-ring {
+  0% {
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+  }
+  100% {
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+  }
+}
 
 /* Animations */
 @keyframes fadeInUp {
@@ -497,46 +897,51 @@ body {
 /* Vision & Mission */
 .vision-mission {
   background: var(--primary-light);
-  padding: 4rem 0; /* tightened gap */
+  padding: 6rem 0;
 }
 
 .vm-header {
   position: relative;
-  margin-bottom: 1rem;
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
 .vm-title {
-  font-size: clamp(2.2rem, 6vw, 3rem);
+  font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 600;
   color: var(--text-primary);
 }
 
-#vision-underline {
-  display: block;
-  width: 100%;
+/* Animated title similar to hero */
+.vm-title span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
 }
 
-#vision-underline-path {
-  stroke: var(--accent-blue);
-  stroke-width: 3;
-  fill: none;
+.vm-title.visible span {
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.vm-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: start;
-  margin-top: 1.5rem;
-}
+.vm-title.visible span:nth-child(1) { animation-delay: 0.1s; }
+.vm-title.visible span:nth-child(2) { animation-delay: 0.2s; }
 
-.vm-col h3 {
-  color: var(--accent-blue-dark);
-  margin-bottom: 0.75rem;
+.vm-content {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .vm-col p {
+  font-size: 1.2rem;
+  line-height: 1.8;
   color: var(--text-secondary);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.vm-col.visible p {
+  animation: fadeInUp 0.8s 0.4s forwards;
+}
   font-size: clamp(1.05rem, 2.2vw, 1.2rem);
   line-height: 1.8;
 }
