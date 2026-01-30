@@ -30,8 +30,8 @@ setTimeout(hideLoader, 3000);
 const themeToggle = document.getElementById('theme-toggle');
 const themeLabel = document.getElementById('theme-toggle-label');
 
-// Get initial theme from localStorage or default to dark
-let currentTheme = localStorage.getItem('theme') || 'dark';
+// Get initial theme from localStorage or default to light
+let currentTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', currentTheme);
 if (themeLabel) {
   themeLabel.textContent = currentTheme === 'dark' ? 'Dark' : 'Light';
