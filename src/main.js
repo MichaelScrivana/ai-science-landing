@@ -29,22 +29,31 @@ setTimeout(hideLoader, 3000);
 // ============================================
 const themeToggle = document.getElementById('theme-toggle');
 const themeLabel = document.getElementById('theme-toggle-label');
+const sunIcon = document.getElementById('sun-icon');
+const moonIcon = document.getElementById('moon-icon');
 
-// Get initial theme from localStorage or default to light
-let currentTheme = localStorage.getItem('theme') || 'light';
+// Helper to update theme display
+const updateThemeDisplay = (theme) => {
+  if (themeLabel) {
+    themeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  }
+  if (sunIcon && moonIcon) {
+    sunIcon.style.display = theme === 'light' ? 'inline-block' : 'none';
+    moonIcon.style.display = theme === 'dark' ? 'inline-block' : 'none';
+  }
+};
+
+// Get initial theme from localStorage or default to dark
+let currentTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', currentTheme);
-if (themeLabel) {
-  themeLabel.textContent = currentTheme === 'dark' ? 'Dark' : 'Light';
-}
+updateThemeDisplay(currentTheme);
 
 if (themeToggle) {
   themeToggle.addEventListener('click', () => {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
     localStorage.setItem('theme', currentTheme);
-    if (themeLabel) {
-      themeLabel.textContent = currentTheme === 'dark' ? 'Dark' : 'Light';
-    }
+    updateThemeDisplay(currentTheme);
   });
 }
 
