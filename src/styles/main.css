@@ -347,6 +347,11 @@ body {
   background: var(--primary-light);
   position: relative;
   transition: background 0.8s ease, box-shadow 0.8s ease;
+  opacity: 0;
+}
+
+.metrics.visible {
+  animation: fade-in 1s ease-out forwards;
 }
 
 .metrics::before {
@@ -378,6 +383,15 @@ body {
     opacity: 0.6;
   }
   50% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }
@@ -484,7 +498,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   pointer-events: none;
   z-index: 1;
 }
@@ -810,6 +824,7 @@ body {
 
 .circuit-pulse.active {
   opacity: 1;
+  animation: pulse-blink 0.8s ease-in-out infinite;
 }
 
 .circuit-pulse::before {
@@ -835,6 +850,55 @@ body {
   height: 10px;
   border-radius: 50%;
   background: #fff;
+}
+
+/* Zoom overlay - fills screen with expanding circle */
+.zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 998;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+
+.zoom-overlay.active {
+  opacity: 1;
+}
+
+.zoom-overlay::before {
+  content: '';
+  position: fixed;
+  top: var(--circle-y, 50%);
+  left: var(--circle-x, 50%);
+  width: calc(var(--circle-radius, 100px) * 2);
+  height: calc(var(--circle-radius, 100px) * 2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--accent-blue),
+    rgba(45, 156, 219, 0.5) 30%,
+    rgba(45, 156, 219, 0.2) 70%,
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 60px var(--accent-blue),
+    inset 0 0 60px rgba(45, 156, 219, 0.4),
+    0 0 100px rgba(45, 156, 219, 0.3);
+}
+
+/* Blinking animation for pulse */
+@keyframes pulse-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Remove old positioning - milestones now flow in document */

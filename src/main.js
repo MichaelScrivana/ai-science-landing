@@ -146,6 +146,11 @@ function initRoadmap() {
   pulse.className = 'circuit-pulse';
   document.body.appendChild(pulse);
   
+  // Create zoom circle overlay for pan/zoom effect
+  const zoomOverlay = document.createElement('div');
+  zoomOverlay.className = 'zoom-overlay';
+  document.body.appendChild(zoomOverlay);
+  
   // Store path info
   let pathLength = 0;
   
@@ -179,15 +184,20 @@ function initRoadmap() {
       lastMilestoneBottom = lastMilestone.bottom + 20;
     }
     
+    // Calculate center for diagonal endpoint
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
     // Build path:
     // 1. Start at center below 'Roadmap'
     // 2. Go down 20px
     // 3. Go horizontally to center of cards
     // 4. Go straight down to last milestone
+    // 5. Go diagonally to center of viewport
     const dropY = startY + 20;
     
-    // Path goes from title, down, to center of cards, then down through all cards
-    const pathD = `M ${startX} ${startY} L ${startX} ${dropY} L ${lineX} ${dropY} L ${lineX} ${lastMilestoneBottom}`;
+    // Path goes from title, down, to center of cards, then down through cards, then diagonally to center
+    const pathD = `M ${startX} ${startY} L ${startX} ${dropY} L ${lineX} ${dropY} L ${lineX} ${lastMilestoneBottom} L ${centerX} ${centerY}`;
     
     path.setAttribute('d', pathD);
     
@@ -221,25 +231,23 @@ function initRoadmap() {
     }
     
     // Calculate progress based on how far through the roadmap section we've scrolled
-    // Start progress when title is at 75% of viewport (matching animation start)
+    // Use tighter scroll range: start when title is at 75% of viewport
+    // End when we've scrolled the roadmap section height (more controlled than full 300vh)
     const startThreshold = windowHeight * 0.75;
     const sectionHeight = roadmapRect.height;
     const scrolledIntoSection = startThreshold - roadmapTop;
-    const totalScrollRange = sectionHeight; // Match section height
+    
+    // Only use portion of section height for progress (e.g., first 80% of visible scrolling)
+    // This keeps animation slower and more controlled
+    const totalScrollRange = sectionHeight * 0.8;
     
     let progress = scrolledIntoSection / totalScrollRange;
     progress = Math.max(0, Math.min(1, progress));
     
-    // Ease-out curve: normal at start, gradually slows down towards the last card
-    let easedProgress;
-    if (progress < 0.6) {
-      easedProgress = progress;  // Linear for first 60%
-    } else {
-      // Gradual slowdown: the closer to end, the slower it moves
-      const remaining = progress - 0.6;
-      const slowFactor = 1 - (remaining * 0.5); // Slows to 80% speed at end
-      easedProgress = 0.6 + remaining * slowFactor;
-    }
+    // Much slower easing: animations take time to complete
+    // 0.6 means animation path completes at 60% of scroll progress
+    // This leaves room to see the diagonal before zoom
+    let easedProgress = progress * 0.6;
     
     // Animate path drawing
     const drawLength = pathLength * easedProgress;
@@ -276,8 +284,65 @@ function initRoadmap() {
           milestone.classList.remove('powered');
         }
       });
+      
+      // Only trigger zoom effect after pulse has traveled significantly along diagonal
+      // This happens when easedProgress exceeds ~0.5 (pulse at >50% of path, in diagonal section)
+      if (easedProgress > 0.5) {
+        // Calculate zoom progression: starts at 50%, completes at 60%
+        const zoomProgress = Math.min(1, (easedProgress - 0.5) / 0.1);
+        updatePanZoom(point.x, point.y, zoomProgress);
+        
+        // Fade line as zoom completes
+        if (easedProgress > 0.55) {
+          path.style.opacity = Math.max(0, 0.7 - (easedProgress - 0.55) * 1.4);
+        }
+      } else {
+        // Before zoom phase - keep line visible
+        zoomOverlay.classList.remove('active');
+        path.style.opacity = '0.7';
+      }
     } else {
       pulse.classList.remove('active');
+      zoomOverlay.classList.remove('active');
+      path.style.opacity = '0.7';
+    }
+  };
+  
+  // Pan and zoom into the circle
+  const updatePanZoom = (pulseX, pulseY, progress) => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const centerX = windowWidth / 2;
+    const centerY = windowHeight / 2;
+    
+    // Smooth ease-in curve for zoom acceleration
+    const easedProgress = progress * progress * progress;
+    
+    // Circle position moves from pulse to center
+    const circleX = pulseX + (centerX - pulseX) * easedProgress;
+    const circleY = pulseY + (centerY - pulseY) * easedProgress;
+    
+    // Circle size grows from small to fill screen
+    const minRadius = 12;
+    const maxRadius = Math.max(windowWidth, windowHeight) * 2;
+    const radius = minRadius + (maxRadius - minRadius) * easedProgress;
+    
+    // Update zoom overlay with CSS custom properties
+    zoomOverlay.style.setProperty('--circle-x', `${circleX}px`);
+    zoomOverlay.style.setProperty('--circle-y', `${circleY}px`);
+    zoomOverlay.style.setProperty('--circle-radius', `${radius}px`);
+    zoomOverlay.style.setProperty('--zoom-progress', easedProgress);
+    
+    // Fade out roadmap section
+    roadmapSection.style.opacity = Math.max(0, 1 - easedProgress * 1.5);
+    roadmapSection.style.pointerEvents = easedProgress > 0.5 ? 'none' : 'auto';
+    
+    zoomOverlay.classList.add('active');
+    
+    // Show metrics section when zoom is complete
+    if (progress >= 0.95 && metricsSection) {
+      metricsSection.classList.add('visible');
+      metricsSection.style.opacity = Math.min(1, (progress - 0.95) * 20);
     }
   };
   
